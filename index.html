@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Credentials Storage</title>
+    <style>
+      .credentials-form {
+        max-width: 400px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .form-group input {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+      }
+      .message {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 4px;
+        display: none;
+      }
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="credentials-form">
+      <h2>Store Your Credentials</h2>
+      <form id="credentialsForm" method="POST" autocomplete="off">
+        <div class="form-group">
+          <label for="username">Username:</label>
+          <input type="text" id="username" name="username" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password" required />
+        </div>
+        <button type="submit">Save Credentials</button>
+      </form>
+      <div id="messageBox" class="message"></div>
+    </div>
+  </body>
+</html>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("credentialsForm");
+    const messageBox = document.getElementById("messageBox");
+
+    const showMessage = (message, isError = false) => {
+      messageBox.textContent = message;
+      messageBox.style.display = "block";
+      messageBox.className = `message ${isError ? "error" : "success"}`;
+    };
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = {
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value,
+      };
+
+      try {
+        showMessage("Saving credentials...");
+
+        // Make sure your API endpoint exists and is correctly configured
+        const response = await fetch("/api/store-credentials", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage("Credentials saved successfully!", false);
+          form.reset();
+        } else {
+          showMessage(data.message || "Failed to save credentials", true);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        showMessage(
+          "Failed to save credentials. Please check your server connection.",
+          true
+        );
+      }
+    });
+  });
+</script>
